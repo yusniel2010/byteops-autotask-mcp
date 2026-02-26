@@ -796,6 +796,28 @@ export const TOOL_DEFINITIONS: McpTool[] = [
     }
   },
 
+  // Expense Item tools
+  {
+    name: 'autotask_create_expense_item',
+    description: 'Create an expense item on an existing expense report',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        expenseReportId: { type: 'number', description: 'The expense report ID to add the item to' },
+        description: { type: 'string', description: 'Line item description' },
+        expenseDate: { type: 'string', description: 'Date of expense (YYYY-MM-DD format)' },
+        expenseCategory: { type: 'number', description: 'Expense category picklist ID' },
+        amount: { type: 'number', description: 'Expense amount' },
+        companyId: { type: 'number', description: 'Associated company ID (0 for internal)' },
+        haveReceipt: { type: 'boolean', description: 'Whether a receipt is attached' },
+        isBillableToCompany: { type: 'boolean', description: 'Whether billable to company' },
+        isReimbursable: { type: 'boolean', description: 'Whether this expense is reimbursable' },
+        paymentType: { type: 'number', description: 'Payment type picklist ID' }
+      },
+      required: ['expenseReportId', 'description', 'expenseDate', 'expenseCategory', 'amount']
+    }
+  },
+
   // Quotes tools
   {
     name: 'autotask_get_quote',

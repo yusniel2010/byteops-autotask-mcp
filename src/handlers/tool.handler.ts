@@ -357,6 +357,12 @@ export class AutotaskToolHandler {
         return { result: id, message: `Successfully created expense report with ID: ${id}` };
       }],
 
+      // Expense Items
+      ['autotask_create_expense_item', async (a) => {
+        const id = await s.createExpenseItem({ expenseReportID: a.expenseReportId, description: a.description, expenseDate: a.expenseDate, expenseCategory: a.expenseCategory, expenseCurrencyExpenseAmount: a.amount, companyID: a.companyId ?? 0, haveReceipt: a.haveReceipt ?? false, isBillableToCompany: a.isBillableToCompany ?? false, isReimbursable: a.isReimbursable ?? true, paymentType: a.paymentType ?? 10 });
+        return { result: id, message: `Successfully created expense item with ID: ${id}` };
+      }],
+
       // Quotes
       ['autotask_get_quote', async (a) => {
         const r = await s.getQuote(a.quoteId); return { result: r, message: 'Quote retrieved successfully' };

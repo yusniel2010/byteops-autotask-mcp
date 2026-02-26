@@ -1116,7 +1116,7 @@ export class AutotaskService {
     
     try {
       this.logger.debug(`Getting expense report with ID: ${id}`);
-      const result = await client.expenses.get(id);
+      const result = await client.expenseReports.get(id);
       return result.data as unknown as AutotaskExpenseReport || null;
     } catch (error) {
       this.logger.error(`Failed to get expense report ${id}:`, error);
@@ -1144,7 +1144,7 @@ export class AutotaskService {
         pageSize: options.pageSize || 25
       };
 
-      const result = await client.expenses.list(queryOptions);
+      const result = await client.expenseReports.list(queryOptions);
       const reports = (result.data as any[]) || [];
       
       this.logger.info(`Retrieved ${reports.length} expense reports`);
@@ -1160,7 +1160,7 @@ export class AutotaskService {
     
     try {
       this.logger.debug('Creating expense report:', report);
-      const result = await client.expenses.create(report as any);
+      const result = await client.expenseReports.create(report as any);
       const reportId = (result.data as any)?.id;
       this.logger.info(`Expense report created with ID: ${reportId}`);
       return reportId;
@@ -1170,21 +1170,65 @@ export class AutotaskService {
     }
   }
 
-  // For expense items, we'll need to use a different approach since they're child entities
-  // This is a placeholder - actual implementation may vary based on API structure
-  async getExpenseItem(_expenseId: number, _itemId: number): Promise<AutotaskExpenseItem | null> {
-    // This would need to be implemented based on the actual API structure for child items
-    throw new Error('Expense items API not yet implemented - requires child entity handling');
+  async getExpenseItem(itemId: number): Promise<AutotaskExpenseItem | null> {
+    const client = await this.ensureClient();
+
+    try {
+      this.logger.debug(`Getting expense item with ID: ${itemId}`);
+      const result = await client.expenseItems.get(itemId);
+      return result.data as unknown as AutotaskExpenseItem || null;
+    } catch (error) {
+      this.logger.error(`Failed to get expense item ${itemId}:`, error);
+      throw error;
+    }
   }
 
-  async searchExpenseItems(_expenseId: number, _options: AutotaskQueryOptionsExtended = {}): Promise<AutotaskExpenseItem[]> {
-    // This would need to be implemented based on the actual API structure for child items
-    throw new Error('Expense items API not yet implemented - requires child entity handling');
+  async searchExpenseItems(options: AutotaskQueryOptionsExtended = {}): Promise<AutotaskExpenseItem[]> {
+    const client = await this.ensureClient();
+
+    try {
+      this.logger.debug('Searching expense items with options:', options);
+
+      const filters = [];
+      if (options.expenseReportId) {
+        filters.push({ field: 'expenseReportID', op: 'eq', value: options.expenseReportId });
+      }
+      if (options.startDate) {
+        filters.push({ field: 'expenseDate', op: 'gte', value: options.startDate });
+      }
+      if (options.endDate) {
+        filters.push({ field: 'expenseDate', op: 'lte', value: options.endDate });
+      }
+
+      const queryOptions = {
+        filter: filters.length > 0 ? filters : [{ field: 'id', op: 'gte', value: 0 }],
+        pageSize: options.pageSize || 25
+      };
+
+      const result = await client.expenseItems.list(queryOptions);
+      const items = (result.data as any[]) || [];
+
+      this.logger.info(`Retrieved ${items.length} expense items`);
+      return items as AutotaskExpenseItem[];
+    } catch (error) {
+      this.logger.error('Failed to search expense items:', error);
+      throw error;
+    }
   }
 
-  async createExpenseItem(_expenseId: number, _item: Partial<AutotaskExpenseItem>): Promise<number> {
-    // This would need to be implemented based on the actual API structure for child items
-    throw new Error('Expense items API not yet implemented - requires child entity handling');
+  async createExpenseItem(item: Partial<AutotaskExpenseItem>): Promise<number> {
+    const client = await this.ensureClient();
+
+    try {
+      this.logger.debug('Creating expense item:', item);
+      const result = await client.expenseItems.create(item as any);
+      const itemId = (result.data as any)?.id;
+      this.logger.info(`Expense item created with ID: ${itemId}`);
+      return itemId;
+    } catch (error) {
+      this.logger.error('Failed to create expense item:', error);
+      throw error;
+    }
   }
 
   // Quote entity

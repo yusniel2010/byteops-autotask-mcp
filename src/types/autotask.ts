@@ -369,6 +369,10 @@ export interface AutotaskQueryOptionsExtended extends AutotaskQueryOptions {
   createdAfter?: string;
   createdBefore?: string;
   lastActivityAfter?: string;
+  // Expense item filters
+  expenseReportId?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 // Note: Ticket status values are instance-specific picklist values.
