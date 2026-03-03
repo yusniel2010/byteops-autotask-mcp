@@ -319,6 +319,53 @@ export const TOOL_DEFINITIONS: McpTool[] = [
     }
   },
 
+  {
+    name: 'autotask_update_ticket',
+    description: 'Update an existing ticket in Autotask. Only fields provided will be changed.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        ticketId: {
+          type: 'number',
+          description: 'The ID of the ticket to update'
+        },
+        title: {
+          type: 'string',
+          description: 'Ticket title'
+        },
+        description: {
+          type: 'string',
+          description: 'Ticket description'
+        },
+        status: {
+          type: 'number',
+          description: 'Ticket status ID (use autotask_list_ticket_statuses to find valid IDs)'
+        },
+        priority: {
+          type: 'number',
+          description: 'Ticket priority ID (use autotask_list_ticket_priorities to find valid IDs)'
+        },
+        assignedResourceID: {
+          type: 'number',
+          description: 'Assigned resource ID. If set, assignedResourceRoleID is also required by Autotask.'
+        },
+        assignedResourceRoleID: {
+          type: 'number',
+          description: 'Role ID for the assigned resource. Required by Autotask when assignedResourceID is set.'
+        },
+        dueDateTime: {
+          type: 'string',
+          description: 'Due date and time in ISO 8601 format (e.g. 2026-03-15T17:00:00Z)'
+        },
+        contactID: {
+          type: 'number',
+          description: 'Contact ID for the ticket'
+        }
+      },
+      required: ['ticketId']
+    }
+  },
+
   // Time entry tools
   {
     name: 'autotask_create_time_entry',
