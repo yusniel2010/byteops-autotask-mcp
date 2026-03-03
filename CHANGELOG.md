@@ -1,3 +1,16 @@
+# [2.9.0](https://github.com/wyre-technology/autotask-mcp/compare/v2.8.1...v2.9.0) (2026-03-03)
+
+
+### Bug Fixes
+
+* **mapping:** coalesce concurrent cache refreshes and fix fetch-all fallback ([ea08f80](https://github.com/wyre-technology/autotask-mcp/commit/ea08f80379898d10f1447a2399ab429151790756))
+* **tests:** update expense item tests to match implemented API signatures ([7fac014](https://github.com/wyre-technology/autotask-mcp/commit/7fac014eedcbc27bf9753e719b042163e770f5ff))
+
+
+### Features
+
+* add create_expense_item tool and fix expense report accessors ([0cf9f09](https://github.com/wyre-technology/autotask-mcp/commit/0cf9f094e09d48fb4ed94e23242cfd354ab7f908))
+
 ## [2.8.1](https://github.com/wyre-technology/autotask-mcp/compare/v2.8.0...v2.8.1) (2026-03-03)
 
 
