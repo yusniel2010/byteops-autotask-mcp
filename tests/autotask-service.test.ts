@@ -129,10 +129,10 @@ describe('AutotaskService', () => {
       await expect(service.searchExpenseReports()).rejects.toThrow();
       await expect(service.createExpenseReport({ name: 'Test Report', submitterID: 123 })).rejects.toThrow();
       
-      // Expense items are implemented — they reject because credentials are missing, not with a specific message
+      // Expense items
       await expect(service.getExpenseItem(456)).rejects.toThrow();
       await expect(service.searchExpenseItems()).rejects.toThrow();
-      await expect(service.createExpenseItem({ description: 'Test', expenseDate: '2024-01-01', expenseAmount: 100 })).rejects.toThrow();
+      await expect(service.createExpenseItem({ description: 'Test', expenseDate: '2024-01-01', expenseCurrencyExpenseAmount: 100 })).rejects.toThrow();
     });
 
     test('should handle quote methods with proper error messages', async () => {
