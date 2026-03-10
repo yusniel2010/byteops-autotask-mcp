@@ -839,7 +839,7 @@ export const TOOL_DEFINITIONS: McpTool[] = [
           description: 'Week ending date (YYYY-MM-DD format)'
         }
       },
-      required: ['submitterId']
+      required: ['name', 'submitterId', 'weekEndingDate']
     }
   },
 

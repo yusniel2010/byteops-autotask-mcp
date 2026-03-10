@@ -823,7 +823,7 @@ export class AutotaskToolHandler {
         return { result: r, message: `Found ${r.length} expense reports` };
       }],
       ['autotask_create_expense_report', async (a) => {
-        const id = await s.createExpenseReport({ name: a.name, description: a.description, submitterID: a.submitterId, weekEndingDate: a.weekEndingDate });
+        const id = await s.createExpenseReport({ name: a.name, description: a.description, submitterID: a.submitterId, weekEnding: a.weekEndingDate || a.weekEnding });
         return { result: id, message: `Successfully created expense report with ID: ${id}` };
       }],
 
