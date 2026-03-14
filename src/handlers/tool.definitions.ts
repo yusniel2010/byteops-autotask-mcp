@@ -523,21 +523,33 @@ export const TOOL_DEFINITIONS: McpTool[] = [
   // Time entry tools
   {
     name: 'autotask_create_time_entry',
-    description: 'Create a time entry in Autotask',
+    description: 'Create a time entry in Autotask. Can be tied to a ticket, task, or project, OR created as "Regular Time" (no parent) for meetings, admin work, etc. For Regular Time, specify a category like "Internal Meeting", "Office Management", "Training", etc.',
     inputSchema: {
       type: 'object',
       properties: {
         ticketID: {
           type: 'number',
-          description: 'Ticket ID for the time entry'
+          description: 'Ticket ID for the time entry (omit for Regular Time)'
         },
         taskID: {
           type: 'number',
-          description: 'Task ID for the time entry (optional, for project work)'
+          description: 'Task ID for the time entry (for project work, omit for Regular Time)'
+        },
+        projectID: {
+          type: 'number',
+          description: 'Project ID for the time entry (omit for Regular Time)'
         },
         resourceID: {
           type: 'number',
-          description: 'Resource ID (user) logging the time'
+          description: 'Resource ID (user) logging the time. Can be omitted if resourceName is provided.'
+        },
+        resourceName: {
+          type: 'string',
+          description: 'Name of the resource/user (e.g., "Will Spence"). Will be resolved to a resourceID automatically. Use this instead of resourceID for convenience.'
+        },
+        category: {
+          type: 'string',
+          description: 'Category name for Regular Time entries (e.g., "Internal Meeting", "Office Management", "Training", "Research", "HR/Recruiting", "Travel Time", "Holiday", "PTO"). Required for Regular Time entries (when no ticket/task/project is specified).'
         },
         dateWorked: {
           type: 'string',
@@ -564,7 +576,7 @@ export const TOOL_DEFINITIONS: McpTool[] = [
           description: 'Internal notes for the time entry'
         }
       },
-      required: ['resourceID', 'dateWorked', 'hoursWorked', 'summaryNotes']
+      required: ['dateWorked', 'hoursWorked', 'summaryNotes']
     }
   },
 

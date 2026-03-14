@@ -619,31 +619,70 @@ export class AutotaskService {
   // Time entry operations
   async createTimeEntry(timeEntry: Partial<AutotaskTimeEntry>): Promise<number> {
     const client = await this.ensureClient();
-    
+
     try {
       this.logger.debug('Creating time entry:', timeEntry);
-      // autotask-node v2.1.0+ supports parent-child URL for ticket-scoped time entries
+      // Ticket-scoped time entries
       if (timeEntry.ticketID) {
         const response = await (client as any).timeEntries.create(timeEntry.ticketID, timeEntry);
-        const timeEntryId = response.data?.id;
+        const timeEntryId = response.data?.itemId || response.data?.id;
         this.logger.info(`Time entry created with ID: ${timeEntryId}`);
         return timeEntryId;
       }
-      // For task/project-scoped time entries, use direct axios call
-      let endpoint: string;
-      if (timeEntry.taskID) {
-        endpoint = `/Tasks/${timeEntry.taskID}/TimeEntries`;
-      } else if (timeEntry.projectID) {
-        endpoint = `/Projects/${timeEntry.projectID}/TimeEntries`;
-      } else {
-        throw new Error('Time entry must have a ticketID, taskID, or projectID');
+      // Task or project-scoped time entries
+      if (timeEntry.taskID || timeEntry.projectID) {
+        let endpoint: string;
+        if (timeEntry.taskID) {
+          endpoint = `/Tasks/${timeEntry.taskID}/TimeEntries`;
+        } else {
+          endpoint = `/Projects/${timeEntry.projectID}/TimeEntries`;
+        }
+        const response = await (client as any).axios.post(endpoint, timeEntry);
+        const timeEntryId = response.data?.itemId || response.data?.item?.id || response.data?.id;
+        this.logger.info(`Time entry created with ID: ${timeEntryId}`);
+        return timeEntryId;
       }
-      const response = await (client as any).axios.post(endpoint, timeEntry);
-      const timeEntryId = response.data?.item?.id || response.data?.id;
-      this.logger.info(`Time entry created with ID: ${timeEntryId}`);
+      // Regular Time entries (no parent - meetings, admin, etc.)
+      // Uses SDK's createRegularTimeEntry which handles timeEntryType and itemId
+      const timeEntryId = await (client as any).timeTracking.createRegularTimeEntry(timeEntry);
+      this.logger.info(`Regular time entry created with ID: ${timeEntryId}`);
       return timeEntryId;
     } catch (error) {
       this.logger.error('Failed to create time entry:', error);
+      throw error;
+    }
+  }
+
+  // Resource name resolution (delegates to SDK)
+  async resolveResourceByName(name: string): Promise<{ id: number; firstName: string; lastName: string } | null> {
+    const client = await this.ensureClient();
+    try {
+      return await (client as any).core.resolveResourceByName(name);
+    } catch (error) {
+      this.logger.error(`Failed to resolve resource "${name}":`, error);
+      throw error;
+    }
+  }
+
+  // Internal billing code helpers (delegates to SDK)
+  async getInternalBillingCodeNames(): Promise<string[]> {
+    const client = await this.ensureClient();
+    try {
+      const result = await (client as any).financial.getInternalBillingCodes();
+      const codes = (result.data as any[]) || [];
+      return codes.map((bc: any) => bc.name);
+    } catch (error) {
+      this.logger.error('Failed to get internal billing codes:', error);
+      throw error;
+    }
+  }
+
+  async resolveInternalBillingCodeByName(name: string): Promise<{ id: number; name: string } | null> {
+    const client = await this.ensureClient();
+    try {
+      return await (client as any).financial.resolveInternalBillingCodeByName(name);
+    } catch (error) {
+      this.logger.error(`Failed to resolve billing code "${name}":`, error);
       throw error;
     }
   }
@@ -2376,12 +2415,26 @@ export class AutotaskService {
 
   // BillingCode and Department entities are not directly available in autotask-node
   // These would need to be implemented via custom API calls or alternative endpoints
-  async getBillingCode(_id: number): Promise<AutotaskBillingCode | null> {
-    throw new Error('Billing codes API not directly available in autotask-node library');
+  async getBillingCode(id: number): Promise<AutotaskBillingCode | null> {
+    const client = await this.ensureClient();
+    try {
+      const result = await (client as any).financial.billingCodes.get(id);
+      return (result.data as AutotaskBillingCode) || null;
+    } catch (error) {
+      this.logger.error(`Failed to get billing code ${id}:`, error);
+      throw error;
+    }
   }
 
   async searchBillingCodes(_options: AutotaskQueryOptionsExtended = {}): Promise<AutotaskBillingCode[]> {
-    throw new Error('Billing codes API not directly available in autotask-node library');
+    const client = await this.ensureClient();
+    try {
+      const result = await (client as any).financial.getActiveBillingCodes();
+      return (result.data as AutotaskBillingCode[]) || [];
+    } catch (error) {
+      this.logger.error('Failed to search billing codes:', error);
+      throw error;
+    }
   }
 
   async getDepartment(_id: number): Promise<AutotaskDepartment | null> {

@@ -850,6 +850,37 @@ export class AutotaskToolHandler {
 
       // Time entries
       ['autotask_create_time_entry', async (a) => {
+        // If no resource specified at all, prompt the user
+        if (!a.resourceID && !a.resourceName) {
+          return { result: null, message: 'Please specify who is logging this time. Provide a resourceName (e.g., "Will Spence") or resourceID.' };
+        }
+        // Resolve resourceName to resourceID via SDK helper
+        if (a.resourceName && !a.resourceID) {
+          const resource = await s.resolveResourceByName(a.resourceName);
+          if (!resource) {
+            throw new Error(`No resource found matching "${a.resourceName}"`);
+          }
+          a.resourceID = resource.id;
+          delete a.resourceName;
+        }
+        // For Regular Time entries (no ticket/task/project), handle category
+        const isRegularTime = !a.ticketID && !a.taskID && !a.projectID;
+        if (isRegularTime) {
+          if (!a.category && !a.internalBillingCodeID) {
+            // List available categories and prompt user
+            const categories = await s.getInternalBillingCodeNames();
+            return { result: null, message: `Please specify a category for this Regular Time entry. Available categories: ${categories.join(', ')}` };
+          }
+          if (a.category && !a.internalBillingCodeID) {
+            const billingCode = await s.resolveInternalBillingCodeByName(a.category);
+            if (!billingCode) {
+              const categories = await s.getInternalBillingCodeNames();
+              throw new Error(`No category found matching "${a.category}". Available categories: ${categories.join(', ')}`);
+            }
+            a.internalBillingCodeID = billingCode.id;
+            delete a.category;
+          }
+        }
         const id = await s.createTimeEntry(a); return { result: id, message: `Successfully created time entry with ID: ${id}` };
       }],
 
