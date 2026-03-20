@@ -1,3 +1,10 @@
+# [2.13.0](https://github.com/wyre-technology/autotask-mcp/compare/v2.12.1...v2.13.0) (2026-03-20)
+
+
+### Features
+
+* add TicketCharges CRUD support ([#36](https://github.com/wyre-technology/autotask-mcp/issues/36)) ([de2d684](https://github.com/wyre-technology/autotask-mcp/commit/de2d684223047d6d87f4682ca2459ed8e02f06fa))
+
 ## [2.12.1](https://github.com/wyre-technology/autotask-mcp/compare/v2.12.0...v2.12.1) (2026-03-20)
 
 
