@@ -226,7 +226,7 @@ export class AutotaskMcpServer {
 
         // In gateway mode, extract credentials from headers
         if (isGatewayMode) {
-          const credentials = this.extractGatewayCredentials(req);
+          const credentials = parseCredentialsFromHeaders(req.headers as Record<string, string | string[] | undefined>);
           if (!credentials.username || !credentials.secret || !credentials.integrationCode) {
             this.logger.warn('Gateway mode: Missing required credentials in headers', {
               hasUsername: !!credentials.username,
@@ -289,38 +289,20 @@ export class AutotaskMcpServer {
   }
 
   /**
-   * Extract credentials from gateway-injected HTTP headers
-   */
-  private extractGatewayCredentials(req: IncomingMessage): GatewayCredentials {
-    const headers = req.headers as Record<string, string | string[] | undefined>;
-    return parseCredentialsFromHeaders(headers);
-  }
-
-  /**
    * Update the Autotask service with new credentials
    * Used in gateway mode where credentials come from request headers
    */
   private updateCredentials(credentials: GatewayCredentials): void {
-    // Re-create the service with new credentials
-    // Build autotask config, only including defined values
     const autotaskConfig: McpServerConfig['autotask'] = {};
-    if (credentials.username) {
-      autotaskConfig.username = credentials.username;
-    }
-    if (credentials.secret) {
-      autotaskConfig.secret = credentials.secret;
-    }
-    if (credentials.integrationCode) {
-      autotaskConfig.integrationCode = credentials.integrationCode;
-    }
-    if (credentials.apiUrl) {
-      autotaskConfig.apiUrl = credentials.apiUrl;
-    }
+    if (credentials.username) autotaskConfig.username = credentials.username;
+    if (credentials.secret) autotaskConfig.secret = credentials.secret;
+    if (credentials.integrationCode) autotaskConfig.integrationCode = credentials.integrationCode;
+    if (credentials.apiUrl) autotaskConfig.apiUrl = credentials.apiUrl;
 
     const newConfig: McpServerConfig = {
       name: this.envConfig?.server?.name || 'autotask-mcp',
       version: this.envConfig?.server?.version || '1.0.0',
-      autotask: autotaskConfig
+      autotask: autotaskConfig,
     };
 
     // Reinitialize service with new credentials

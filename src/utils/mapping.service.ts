@@ -176,26 +176,6 @@ export class MappingService {
   }
 
   /**
-   * Get multiple company names in a single call
-   */
-  async getCompanyNames(companyIds: number[]): Promise<(string | null)[]> {
-    const results = await Promise.all(
-      companyIds.map(id => this.getCompanyName(id))
-    );
-    return results;
-  }
-
-  /**
-   * Get multiple resource names in a single call
-   */
-  async getResourceNames(resourceIds: number[]): Promise<(string | null)[]> {
-    const results = await Promise.all(
-      resourceIds.map(id => this.getResourceName(id))
-    );
-    return results;
-  }
-
-  /**
    * Refresh the company cache
    */
   private async refreshCompanyCache(): Promise<void> {
@@ -288,24 +268,6 @@ export class MappingService {
   }
 
   /**
-   * Clear company cache only
-   */
-  public clearCompanyCache(): void {
-    this.cache.companies.clear();
-    this.cache.lastUpdated.companies = null;
-    this.logger.info('Company cache cleared');
-  }
-
-  /**
-   * Clear resource cache only
-   */
-  public clearResourceCache(): void {
-    this.cache.resources.clear();
-    this.cache.lastUpdated.resources = null;
-    this.logger.info('Resource cache cleared');
-  }
-
-  /**
    * Get cache statistics
    */
   public getCacheStats(): {
@@ -325,21 +287,4 @@ export class MappingService {
       },
     };
   }
-
-  /**
-   * Preload caches (useful for warming up on startup)
-   */
-  async preloadCaches(): Promise<void> {
-    this.logger.info('Preloading mapping caches...');
-    try {
-      await Promise.all([
-        this.refreshCompanyCache(),
-        this.refreshResourceCache(),
-      ]);
-      this.logger.info('Mapping caches preloaded successfully');
-    } catch (error) {
-      this.logger.error('Failed to preload caches:', error);
-      throw error;
-    }
-  }
-} 
+}

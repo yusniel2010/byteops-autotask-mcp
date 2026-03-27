@@ -86,42 +86,27 @@ export function parseCredentialsFromHeaders(headers: Record<string, string | str
  * Load configuration from environment variables
  */
 export function loadEnvironmentConfig(): EnvironmentConfig {
-  const autotaskConfig: { username?: string; secret?: string; integrationCode?: string; apiUrl?: string } = {};
-
   // Support both direct env vars and gateway-injected vars
   // Gateway vars (X_API_KEY, etc.) take precedence when in gateway mode
   const authMode = (process.env.AUTH_MODE as AuthMode) || 'env';
 
-  if (authMode === 'gateway') {
-    // Gateway mode: prefer X_* vars from gateway headers
-    const gatewayCreds = getCredentialsFromGateway();
-    if (gatewayCreds.username) {
-      autotaskConfig.username = gatewayCreds.username;
-    }
-    if (gatewayCreds.secret) {
-      autotaskConfig.secret = gatewayCreds.secret;
-    }
-    if (gatewayCreds.integrationCode) {
-      autotaskConfig.integrationCode = gatewayCreds.integrationCode;
-    }
-    if (gatewayCreds.apiUrl) {
-      autotaskConfig.apiUrl = gatewayCreds.apiUrl;
-    }
-  } else {
-    // Direct env mode: use AUTOTASK_* vars
-    if (process.env.AUTOTASK_USERNAME) {
-      autotaskConfig.username = process.env.AUTOTASK_USERNAME;
-    }
-    if (process.env.AUTOTASK_SECRET) {
-      autotaskConfig.secret = process.env.AUTOTASK_SECRET;
-    }
-    if (process.env.AUTOTASK_INTEGRATION_CODE) {
-      autotaskConfig.integrationCode = process.env.AUTOTASK_INTEGRATION_CODE;
-    }
-    if (process.env.AUTOTASK_API_URL) {
-      autotaskConfig.apiUrl = process.env.AUTOTASK_API_URL;
-    }
-  }
+  // getCredentialsFromGateway falls back to AUTOTASK_* env vars internally,
+  // so it works for both modes. In env mode, use AUTOTASK_* vars directly.
+  const creds = authMode === 'gateway'
+    ? getCredentialsFromGateway()
+    : {
+        username: process.env.AUTOTASK_USERNAME,
+        secret: process.env.AUTOTASK_SECRET,
+        integrationCode: process.env.AUTOTASK_INTEGRATION_CODE,
+        apiUrl: process.env.AUTOTASK_API_URL,
+      };
+
+  // Filter out undefined values to satisfy exactOptionalPropertyTypes
+  const autotaskConfig: { username?: string; secret?: string; integrationCode?: string; apiUrl?: string } = {};
+  if (creds.username) autotaskConfig.username = creds.username;
+  if (creds.secret) autotaskConfig.secret = creds.secret;
+  if (creds.integrationCode) autotaskConfig.integrationCode = creds.integrationCode;
+  if (creds.apiUrl) autotaskConfig.apiUrl = creds.apiUrl;
 
   const transportType = (process.env.MCP_TRANSPORT as TransportType) || 'stdio';
   if (transportType !== 'stdio' && transportType !== 'http') {
@@ -169,74 +154,4 @@ export function mergeWithMcpConfig(envConfig: EnvironmentConfig, mcpArgs?: Recor
   return serverConfig;
 }
 
-/**
- * Validate that all required configuration is present
- */
-export function validateConfig(config: McpServerConfig): string[] {
-  const errors: string[] = [];
-
-  if (!config.autotask.username) {
-    errors.push('AUTOTASK_USERNAME is required');
-  }
-
-  if (!config.autotask.secret) {
-    errors.push('AUTOTASK_SECRET is required');
-  }
-
-  if (!config.autotask.integrationCode) {
-    errors.push('AUTOTASK_INTEGRATION_CODE is required');
-  }
-
-  if (!config.name) {
-    errors.push('Server name is required');
-  }
-
-  if (!config.version) {
-    errors.push('Server version is required');
-  }
-
-  return errors;
-}
-
-/**
- * Get configuration help text
- */
-export function getConfigHelp(): string {
-  return `
-Autotask MCP Server Configuration:
-
-=== Local Mode (default) ===
-Required Environment Variables:
-  AUTOTASK_USERNAME         - Autotask API username (email)
-  AUTOTASK_SECRET          - Autotask API secret key
-  AUTOTASK_INTEGRATION_CODE - Autotask integration code
-
-=== Gateway Mode (hosted deployment) ===
-When AUTH_MODE=gateway, credentials are injected by the MCP Gateway:
-  X_API_KEY                - Autotask API username (from X-API-Key header)
-  X_API_SECRET             - Autotask API secret (from X-API-Secret header)
-  X_INTEGRATION_CODE       - Autotask integration code (from X-Integration-Code header)
-
-=== Common Options ===
-  AUTOTASK_API_URL         - Autotask API base URL (auto-detected if not provided)
-  AUTH_MODE                - Authentication mode: env (default), gateway
-  MCP_SERVER_NAME          - Server name (default: autotask-mcp)
-  MCP_SERVER_VERSION       - Server version (default: 1.0.0)
-  MCP_TRANSPORT            - Transport type: stdio, http (default: stdio)
-  MCP_HTTP_PORT            - HTTP port when using http transport (default: 8080)
-  MCP_HTTP_HOST            - HTTP host when using http transport (default: 0.0.0.0)
-  LOG_LEVEL                - Logging level: error, warn, info, debug (default: info)
-  LOG_FORMAT               - Log format: simple, json (default: simple)
-  LAZY_LOADING             - Enable progressive tool discovery (default: false)
-
-Example (Local Mode):
-  AUTOTASK_USERNAME=api-user@example.com
-  AUTOTASK_SECRET=your-secret-key
-  AUTOTASK_INTEGRATION_CODE=your-integration-code
-
-Example (Gateway Mode):
-  AUTH_MODE=gateway
-  MCP_TRANSPORT=http
-  # Credentials injected by gateway via X-API-Key, X-API-Secret, X-Integration-Code headers
-`.trim();
-} 
+ 

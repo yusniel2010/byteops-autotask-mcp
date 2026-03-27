@@ -193,18 +193,4 @@ export class AutotaskResourceHandler {
     };
   }
 
-  /**
-   * Get available resource templates for documentation
-   */
-  getResourceTemplates(): string[] {
-    return [
-      'autotask://companies',
-      'autotask://companies/{id}',
-      'autotask://contacts',
-      'autotask://contacts/{id}',
-      'autotask://tickets',
-      'autotask://tickets/{id}',
-      'autotask://time-entries'
-    ];
-  }
 } 
