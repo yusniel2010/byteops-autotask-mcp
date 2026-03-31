@@ -847,6 +847,7 @@ export class AutotaskToolHandler {
         return { result: a.serviceCallTicketResourceId, message: `Successfully removed resource from service call ticket` };
       }],
 
+
       // Time entries
       ['autotask_create_time_entry', async (a) => {
         const id = await s.createTimeEntry(a); return { result: id, message: `Successfully created time entry with ID: ${id}` };

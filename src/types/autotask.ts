@@ -407,6 +407,7 @@ export interface AutotaskServiceCallTicketResource {
   [key: string]: any;
 }
 
+
 export interface AutotaskBillingCode {
   id?: number;
   name?: string;
