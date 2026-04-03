@@ -1,3 +1,10 @@
+## [2.16.1](https://github.com/wyre-technology/autotask-mcp/compare/v2.16.0...v2.16.1) (2026-04-03)
+
+
+### Bug Fixes
+
+* **time-entries:** bypass broken list() filter by calling /TimeEntries/query directly ([146e94d](https://github.com/wyre-technology/autotask-mcp/commit/146e94d0b415c339d5201071e2e56ff1b6d4429c)), closes [#53](https://github.com/wyre-technology/autotask-mcp/issues/53)
+
 # [2.16.0](https://github.com/wyre-technology/autotask-mcp/compare/v2.15.2...v2.16.0) (2026-03-31)
 
 
