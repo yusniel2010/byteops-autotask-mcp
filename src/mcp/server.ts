@@ -224,25 +224,15 @@ export class AutotaskMcpServer {
           return;
         }
 
-        // In gateway mode, extract credentials from headers
+        // In gateway mode, set credentials if provided but don't reject
+        // requests without them. tools/list and initialize don't need
+        // credentials; tools/call will fail with a clear error if
+        // credentials are missing when the API client is created.
         if (isGatewayMode) {
           const credentials = parseCredentialsFromHeaders(req.headers as Record<string, string | string[] | undefined>);
-          if (!credentials.username || !credentials.secret || !credentials.integrationCode) {
-            this.logger.warn('Gateway mode: Missing required credentials in headers', {
-              hasUsername: !!credentials.username,
-              hasSecret: !!credentials.secret,
-              hasIntegrationCode: !!credentials.integrationCode,
-            });
-            res.writeHead(401, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-              error: 'Missing credentials',
-              message: 'Gateway mode requires X-API-Key, X-API-Secret, and X-Integration-Code headers',
-              required: ['X-API-Key', 'X-API-Secret', 'X-Integration-Code']
-            }));
-            return;
+          if (credentials.username && credentials.secret && credentials.integrationCode) {
+            this.updateCredentials(credentials);
           }
-          // Update service credentials for this request
-          this.updateCredentials(credentials);
         }
 
         // Stateless: create fresh server + transport for each request
