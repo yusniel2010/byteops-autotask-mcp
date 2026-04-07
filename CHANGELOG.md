@@ -1,3 +1,10 @@
+## [2.17.2](https://github.com/wyre-technology/autotask-mcp/compare/v2.17.1...v2.17.2) (2026-04-07)
+
+
+### Bug Fixes
+
+* **ci:** deploy :latest tag, force revision via env var bump ([dd31423](https://github.com/wyre-technology/autotask-mcp/commit/dd3142390e20236a77bf784b79856a8c28a11f1f))
+
 ## [2.17.1](https://github.com/wyre-technology/autotask-mcp/compare/v2.17.0...v2.17.1) (2026-04-06)
 
 
